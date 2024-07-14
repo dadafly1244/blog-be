@@ -26,15 +26,15 @@ const handleNewUser = async (req, res) => {
 
     // 프로필 정보 초기화
     const profileData = {
-      firstName: profile.firstName || "당신의 성을 알고 싶어요.",
-      lastName: profile.lastName || "이름 없는 당신",
-      gender: profile.gender || "prefer not to say",
-      birthDate: profile.birthDate || "",
+      firstName: profile?.firstName || "당신의 성을 알고 싶어요.",
+      lastName: profile?.lastName || "이름 없는 당신",
+      gender: profile?.gender || "prefer not to say",
+      birthDate: profile?.birthDate || "",
       bio: profile.bio,
       status: profile.status || "inActive",
-      avatar: profile.avatar || "",
-      location: profile.location || "",
-      website: profile.website || "",
+      avatar: profile?.avatar || "",
+      location: profile?.location || "",
+      website: profile?.website || "",
       socialLinks: {
         facebook: profile.socialLinks?.facebook || "",
         twitter: profile.socialLinks?.twitter || "",
@@ -44,7 +44,7 @@ const handleNewUser = async (req, res) => {
     };
 
     // 사용자 역할 설정
-    const userRole = ROLES_LIST[profile.role] || ROLES_LIST["User"];
+    const userRole = ROLES_LIST[profile.roles] || ROLES_LIST["User"];
 
     // 새 사용자 생성 및 저장
     const newUser = await User.create({
