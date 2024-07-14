@@ -1,10 +1,9 @@
-const { ROLES_LIST } = require("../config/roles_list");
 const User = require("../model/User");
 const bcrypt = require("bcrypt");
 
 // 회원가입 API
 const handleNewUser = async (req, res) => {
-  const { user, pwd, profile } = req.body;
+  const { user, pwd, roles, status, profile } = req.body;
 
   // 필수 입력 항목 검증
   if (!user || !pwd || !profile || !profile.bio) {
@@ -32,7 +31,7 @@ const handleNewUser = async (req, res) => {
       gender: profile?.gender || "prefer not to say",
       birthDate: profile?.birthDate || "",
       bio: profile.bio,
-      status: req.body?.status || "inActive",
+      status: status || "inActive",
       avatar: profile?.avatar || "",
       location: profile?.location || "",
       website: profile?.website || "",
@@ -45,7 +44,7 @@ const handleNewUser = async (req, res) => {
     };
 
     // 사용자 역할 설정
-    ROLES_LIST.find((el) => el === role) === !undefined ? role : "dkdkdk";
+    const userRole = roles;
 
     // 새 사용자 생성 및 저장
     const newUser = await User.create({
