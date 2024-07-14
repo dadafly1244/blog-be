@@ -70,9 +70,7 @@ const createNewUser = async (req, res) => {
   const userObject = {
     username,
     password: hashedPwd,
-    roles: ROLES_LIST.includes(req.body?.roles)
-      ? ROLES_LIST[req.body?.roles]
-      : ROLES_LIST["User"], // Default role if not provided
+    roles: ROLES_LIST.includes(req.body?.roles) ? req.body?.roles : "User", // Default role if not provided
     profile: {
       firstName: profile?.firstName || "",
       lastName: profile?.lastName || "",

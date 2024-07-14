@@ -4,6 +4,8 @@ const notesController = require("../../controllers/notesController");
 const verifyJWT = require("../../middleware/verifyJWT");
 const verifyRoles = require("../../middleware/verifyRoles");
 const ROLES_LIST = require("../../config/roles_list");
+const [Admin, Editor] = ROLES_LIST;
+
 router.use(verifyJWT);
 
 router
@@ -14,10 +16,7 @@ router
   .route("/:id")
   .get(notesController.getNote)
   .patch(notesController.updateNote)
-  .delete(
-    verifyRoles(ROLES_LIST.Admin, ROLES_LIST.Editor),
-    notesController.deleteNote
-  );
+  .delete(verifyRoles(Admin, Editor), notesController.deleteNote);
 router.get("/category/:category", notesController.getNotesByCategory);
 
 module.exports = router;

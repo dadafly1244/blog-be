@@ -13,9 +13,8 @@ const handleNewUser = async (req, res) => {
     });
   }
 
-  console.log(user, pwd, profile);
-
-  console.log("rolelist", ROLES_LIST[req.body.roles], ROLES_LIST["User"]);
+  //console.log(user, pwd, profile);
+  console.log("rolelist", req.body);
   try {
     // 중복 사용자 검증
     const duplicateCount = await User.countDocuments({ username: user });
@@ -46,7 +45,7 @@ const handleNewUser = async (req, res) => {
     };
 
     // 사용자 역할 설정
-    const userRole = ROLES_LIST[req.body.roles] || ROLES_LIST["User"];
+    ROLES_LIST.find((el) => el === role) === !undefined ? role : "dkdkdk";
 
     // 새 사용자 생성 및 저장
     const newUser = await User.create({
@@ -56,7 +55,7 @@ const handleNewUser = async (req, res) => {
       profile: profileData,
     });
 
-    console.log(newUser);
+    console.log("newUser", newUser);
 
     res.status(201).json({ success: `New user ${user} created!` });
   } catch (err) {

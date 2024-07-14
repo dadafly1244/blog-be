@@ -4,6 +4,7 @@ const commentsController = require("../../controllers/commentController");
 const verifyJWT = require("../../middleware/verifyJWT");
 const verifyRoles = require("../../middleware/verifyRoles");
 const ROLES_LIST = require("../../config/roles_list");
+const [Admin, Editor, User] = ROLES_LIST;
 
 router.use(verifyJWT);
 
@@ -11,21 +12,12 @@ router.use(verifyJWT);
 router
   .route("/")
   .get(commentsController.getAllComments)
-  .post(
-    verifyRoles(ROLES_LIST.User, ROLES_LIST.Editor),
-    commentsController.createNewComment
-  );
+  .post(verifyRoles(User, Editor), commentsController.createNewComment);
 
 router
   .route("/:id")
-  .patch(
-    verifyRoles(ROLES_LIST.User, ROLES_LIST.Editor),
-    commentsController.updateComment
-  )
-  .delete(
-    verifyRoles(ROLES_LIST.Admin, ROLES_LIST.User, ROLES_LIST.Editor),
-    commentsController.deleteComment
-  );
+  .patch(verifyRoles(User, Editor), commentsController.updateComment)
+  .delete(verifyRoles(Admin, User, Editor), commentsController.deleteComment);
 
 router.route("/note/:noteId").get(commentsController.getCommentsByNoteId);
 

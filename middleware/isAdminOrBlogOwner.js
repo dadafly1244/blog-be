@@ -1,8 +1,9 @@
+const ROLES_LIST = require("../config/roles_list");
+
+const [Admin, ,] = ROLES_LIST;
+
 const isAdminOrBlogOwner = (req, res, next) => {
-  if (
-    req.user.roles.includes(ROLES_LIST.Admin) ||
-    req.user.id === req.params.id
-  ) {
+  if (req.body?.roles === Admin || req.user.id === req.params.id) {
     next();
   } else {
     res
