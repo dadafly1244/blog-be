@@ -1,5 +1,6 @@
 const User = require("../model/User");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 // 회원가입 API
 const handleNewUser = async (req, res) => {
@@ -23,7 +24,11 @@ const handleNewUser = async (req, res) => {
 
     // 비밀번호 암호화
     const hashedPwd = await bcrypt.hash(pwd, 10);
-
+    const newRefreshToken = jwt.sign(
+      { username: user },
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: "30m" }
+    );
     // 프로필 정보 초기화
     const profileData = {
       firstName: profile?.firstName || "당신의 성을 알고 싶어요.",
@@ -52,11 +57,15 @@ const handleNewUser = async (req, res) => {
       password: hashedPwd,
       roles: userRole,
       profile: profileData,
+      refreshToken: [newRefreshToken],
     });
 
     console.log("newUser", newUser);
 
-    res.status(201).json({ success: `New user ${user} created!` });
+    res.status(201).json({
+      success: `New user ${user} created!`,
+      refreshToken: [newRefreshToken],
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Internal server error." });
