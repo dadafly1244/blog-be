@@ -14,6 +14,8 @@ const handleNewUser = async (req, res) => {
   }
 
   console.log(user, pwd, profile);
+
+  console.log("rolelist", ROLES_LIST[req.body.roles], ROLES_LIST["User"]);
   try {
     // 중복 사용자 검증
     const duplicateCount = await User.countDocuments({ username: user });
