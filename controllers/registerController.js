@@ -13,6 +13,7 @@ const handleNewUser = async (req, res) => {
     });
   }
 
+  console.log(user, pwd, profile);
   try {
     // 중복 사용자 검증
     const duplicateCount = await User.countDocuments({ username: user });
