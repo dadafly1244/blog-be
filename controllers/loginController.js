@@ -50,7 +50,7 @@ const handleLogin = async (req, res) => {
       httpOnly: true,
       secure: true,
       sameSite: "None",
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 30 * 60 * 1000,
     });
 
     // Send authorization roles and access token to user
