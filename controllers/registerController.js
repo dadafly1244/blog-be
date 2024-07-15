@@ -14,7 +14,7 @@ const handleNewUser = async (req, res) => {
   }
 
   //console.log(user, pwd, profile);
-  console.log("rolelist", req.body);
+  console.log("rolelist", roles);
   try {
     // 중복 사용자 검증
     const duplicateCount = await User.countDocuments({ user: user });
@@ -30,6 +30,7 @@ const handleNewUser = async (req, res) => {
         UserInfo: {
           user: user,
           roles: roles,
+          status: status,
         },
       },
       process.env.ACCESS_TOKEN_SECRET,
@@ -69,14 +70,11 @@ const handleNewUser = async (req, res) => {
       },
     };
 
-    // 사용자 역할 설정
-    const userRole = roles;
-
     // 새 사용자 생성 및 저장
     const newUser = await User.create({
       user: user,
       pwd: hashedPwd,
-      roles: userRole,
+      roles: roles,
       profile: profileData,
       refreshToken: [refreshToken],
     });

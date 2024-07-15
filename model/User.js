@@ -8,11 +8,9 @@ const userSchema = new Schema({
     required: true,
   },
   roles: {
-    User: {
-      type: String,
-      default: "User",
-      enum: ["Admin", "Editor", "User"],
-    },
+    type: String,
+    default: "User",
+    enum: ["Admin", "Editor", "User"],
   },
   pwd: {
     type: String,

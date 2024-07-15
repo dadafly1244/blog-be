@@ -15,10 +15,10 @@ const handleLogin = async (req, res) => {
   // evaluate pwd
   const match = await bcrypt.compare(pwd, foundUser.pwd);
   if (match) {
-    const roles = Object.values(foundUser.roles).filter(Boolean)[0];
+    const roles = foundUser.roles;
     const status = foundUser.profile.status;
 
-    console.log("status", status);
+    console.log("status", roles);
 
     // create JWTs
     const accessToken = jwt.sign(
