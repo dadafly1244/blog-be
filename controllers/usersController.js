@@ -18,7 +18,7 @@ const getAllUsers = async (req, res, next) => {
     const { limit, offset } = getPagination(page, size);
 
     const users = await User.find()
-      .select("-password") // Exclude password from the result
+      .select("-pwd") // Exclude pwd from the result
       .skip(offset)
       .limit(limit)
       .lean();
@@ -44,32 +44,30 @@ const getAllUsers = async (req, res, next) => {
 // @route POST /users
 // @access Private
 const createNewUser = async (req, res) => {
-  const { username, password, roles, profile } = req.body;
+  const { user, pwd, roles, profile } = req.body;
 
   // Confirm data
-  if (!username || !password) {
-    return res
-      .status(400)
-      .json({ message: "Username and password are required" });
+  if (!user || !pwd) {
+    return res.status(400).json({ message: "user and pwd are required" });
   }
 
-  // Check for duplicate username
-  const duplicate = await User.findOne({ username })
+  // Check for duplicate user
+  const duplicate = await User.findOne({ user })
     .collation({ locale: "en", strength: 2 })
     .lean()
     .exec();
 
   if (duplicate) {
-    return res.status(409).json({ message: "Duplicate username" });
+    return res.status(409).json({ message: "Duplicate user" });
   }
 
-  // Hash password
-  const hashedPwd = await bcrypt.hash(password, 10); // salt rounds
+  // Hash pwd
+  const hashedPwd = await bcrypt.hash(pwd, 10); // salt rounds
 
   // Prepare user object
   const userObject = {
-    username,
-    password: hashedPwd,
+    user,
+    pwd: hashedPwd,
     roles: ROLES_LIST.includes(req.body?.roles) ? req.body?.roles : "User", // Default role if not provided
     profile: {
       firstName: profile?.firstName || "",
@@ -95,7 +93,7 @@ const createNewUser = async (req, res) => {
     const user = await User.create(userObject);
 
     if (user) {
-      res.status(201).json({ message: `New user ${username} created` });
+      res.status(201).json({ message: `New user ${user} created` });
     } else {
       res.status(400).json({ message: "Invalid user data received" });
     }
@@ -115,13 +113,13 @@ const deleteUser = async (req, res, next) => {
       return res.status(400).json({ message: "User ID required" });
     }
 
-    const user = await User.findById(id);
+    const findUser = await User.findById(id);
 
-    if (!user) {
+    if (!findUser) {
       return res.status(404).json({ message: `User with ID ${id} not found` });
     }
 
-    await user.remove();
+    await findUser.remove();
 
     res.json({ message: `User with ID ${id} deleted successfully` });
   } catch (error) {
@@ -140,7 +138,7 @@ const getUser = async (req, res, next) => {
       return res.status(400).json({ message: "User ID required" });
     }
 
-    const user = await User.findById(id).select("-password").lean();
+    const user = await User.findById(id).select("-pwd").lean();
 
     if (!user) {
       return res.status(404).json({ message: `User with ID ${id} not found` });
@@ -158,23 +156,23 @@ const getUser = async (req, res, next) => {
 const updateUser = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { username, email, roles } = req.body;
+    const { user, email, roles } = req.body;
 
     if (!id) {
       return res.status(400).json({ message: "User ID required" });
     }
 
-    const user = await User.findById(id);
+    const findUser = await User.findById(id);
 
-    if (!user) {
+    if (!findUser) {
       return res.status(404).json({ message: `User with ID ${id} not found` });
     }
 
-    if (username) user.username = username;
+    if (user) user.user = user;
     if (email) user.email = email;
     if (roles) user.roles = roles;
 
-    const updatedUser = await user.save();
+    const updatedUser = await findUser.save();
 
     res.json({ message: "User updated successfully", user: updatedUser });
   } catch (error) {
@@ -199,7 +197,7 @@ const getUserProfile = async (req, res, next) => {
       return res.status(403).json({ message: "Access denied" });
     }
 
-    const user = await User.findById(id).select("-password -refreshToken");
+    const user = await User.findById(id).select("-pwd -refreshToken");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -233,29 +231,29 @@ const updateUserProfile = async (req, res, next) => {
       return res.status(403).json({ message: "Access denied" });
     }
 
-    const user = await User.findById(id);
-    if (!user) {
+    const findUser = await User.findById(id);
+    if (!findUser) {
       return res.status(404).json({ message: "User not found" });
     }
 
     // Update profile fields
-    user.profile = {
-      ...user.profile,
-      firstName: firstName || user.profile.firstName,
-      lastName: lastName || user.profile.lastName,
-      gender: gender || user.profile.gender,
-      birthDate: birthDate || user.profile.birthDate,
-      bio: bio || user.profile.bio,
-      status: status || user.profile.status,
-      location: location || user.profile.location,
-      website: website || user.profile.website,
+    findUser.profile = {
+      ...findUser.profile,
+      firstName: firstName || findUser.profile.firstName,
+      lastName: lastName || findUser.profile.lastName,
+      gender: gender || findUser.profile.gender,
+      birthDate: birthDate || findUser.profile.birthDate,
+      bio: bio || findUser.profile.bio,
+      status: status || findUser.profile.status,
+      location: location || findUser.profile.location,
+      website: website || findUser.profile.website,
       socialLinks: {
-        ...user.profile.socialLinks,
+        ...findUser.profile.socialLinks,
         ...socialLinks,
       },
     };
 
-    const updatedUser = await user.save();
+    const updatedUser = await findUser.save();
 
     res.json({ message: "Profile updated successfully", user: updatedUser });
   } catch (error) {
@@ -263,37 +261,37 @@ const updateUserProfile = async (req, res, next) => {
   }
 };
 
-// @desc Change user password
-// @route PATCH /users/:id/change-password
+// @desc Change user pwd
+// @route PATCH /users/:id/change-pwd
 // @access Private
-const changePassword = async (req, res, next) => {
+const changePwd = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { currentPassword, newPassword } = req.body;
+    const { currentPwd, newPwd } = req.body;
 
     // 요청한 사용자가 비밀번호를 변경하려는 계정의 소유자인지 확인
     if (req.user.id !== id) {
       return res.status(403).json({ message: "Access denied" });
     }
 
-    const user = await User.findById(id);
-    if (!user) {
+    const findUser = await User.findById(id);
+    if (!findUser) {
       return res.status(404).json({ message: "User not found" });
     }
 
     // 현재 비밀번호 확인
-    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    const isMatch = await bcrypt.compare(currentPwd, findUser.pwd);
     if (!isMatch) {
-      return res.status(400).json({ message: "Current password is incorrect" });
+      return res.status(400).json({ message: "Current pwd is incorrect" });
     }
 
     // 새 비밀번호 해시
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
-    user.password = hashedPassword;
+    const hashedPwd = await bcrypt.hash(newPwd, 10);
+    findUser.pwd = hashedPwd;
 
-    await user.save();
+    await findUser.save();
 
-    res.json({ message: "Password changed successfully" });
+    res.json({ message: "Pwd changed successfully" });
   } catch (error) {
     next(error);
   }
@@ -315,23 +313,25 @@ const uploadAvatar = async (req, res, next) => {
       return res.status(400).json({ message: "No file uploaded" });
     }
 
-    const user = await User.findById(id);
-    if (!user) {
+    const findUser = await User.findById(id);
+    if (!findUser) {
       return res.status(404).json({ message: "User not found" });
     }
 
     // 이전 아바타가 있다면 삭제
-    if (user.profile.avatar) {
-      await gfs.delete(new mongoose.Types.ObjectId(user.profile.avatar));
+    if (findUser.profile.avatar) {
+      await gfs.delete(
+        new mongoose.isObjectIdOrHexString(findUser.profile.avatar)
+      );
     }
 
     // 새 아바타 파일 ID 저장
-    user.profile.avatar = req.file.id;
-    await user.save();
+    findUser.profile.avatar = req.file.id;
+    await findUser.save();
 
     res.json({
       message: "Avatar uploaded successfully",
-      avatarId: user.profile.avatar,
+      avatarId: findUser.profile.avatar,
     });
   } catch (error) {
     next(error);
@@ -346,7 +346,7 @@ const getAvatar = async (req, res) => {
     }
 
     const file = await gfs.files.findOne({
-      _id: new mongoose.Types.ObjectId(user.profile.avatar),
+      _id: new ObjectId.createFromHexString(user.profile.avatar),
     });
     if (!file) {
       return res.status(404).json({ message: "Avatar not found" });
@@ -367,7 +367,7 @@ module.exports = {
   updateUser,
   getUserProfile,
   updateUserProfile,
-  changePassword,
+  changePwd,
   uploadAvatar,
   getAvatar,
 };

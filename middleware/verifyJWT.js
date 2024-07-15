@@ -10,7 +10,7 @@ const verifyJWT = (req, res, next) => {
   console.log(token);
   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
     if (err) return res.sendStatus(403); //invalid token
-    req.user = decoded.UserInfo.username;
+    req.user = decoded.UserInfo.user;
     req.roles = decoded.UserInfo.roles;
     next();
   });

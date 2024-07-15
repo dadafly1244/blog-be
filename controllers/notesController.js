@@ -10,7 +10,7 @@ const getAllNotes = async (req, res, next) => {
       .sort(sort)
       .skip((page - 1) * limit)
       .limit(limit)
-      .populate("user", "username")
+      .populate("user", "user")
       .populate("categories", "name")
       .lean();
 
@@ -34,7 +34,7 @@ const getAllNotes = async (req, res, next) => {
 const getNote = async (req, res, next) => {
   try {
     const note = await Note.findById(req.params.id)
-      .populate("user", "username")
+      .populate("user", "user")
       .populate("categories", "name")
       .lean();
     if (!note) {
@@ -131,7 +131,7 @@ const getNotesByCategory = async (req, res, next) => {
       .sort("-createdAt")
       .skip((page - 1) * limit)
       .limit(limit)
-      .populate("user", "username")
+      .populate("user", "user")
       .populate("categories", "name")
       .lean();
 

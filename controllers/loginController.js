@@ -7,31 +7,33 @@ const handleLogin = async (req, res) => {
 
   const { user, pwd } = req.body;
   if (!user || !pwd)
-    return res
-      .status(400)
-      .json({ message: "Username and password are required." });
+    return res.status(400).json({ message: "user and pwd are required." });
 
-  const foundUser = await User.findOne({ username: user }).exec();
+  const foundUser = await User.findOne({ user: user }).exec();
   if (!foundUser) return res.sendStatus(401); //Unauthorized
 
-  // evaluate password
-  const match = await bcrypt.compare(pwd, foundUser.password);
+  // evaluate pwd
+  const match = await bcrypt.compare(pwd, foundUser.pwd);
   if (match) {
-    const roles = Object.values(foundUser.roles).filter(Boolean);
+    const roles = Object.values(foundUser.roles).filter(Boolean)[0];
+    const status = foundUser.profile.status;
+
+    console.log("status", status);
 
     // create JWTs
     const accessToken = jwt.sign(
       {
         UserInfo: {
-          username: foundUser.username,
+          user: foundUser.user,
           roles: roles,
+          status: status,
         },
       },
       process.env.ACCESS_TOKEN_SECRET,
       { expiresIn: "10m" }
     );
     const newRefreshToken = jwt.sign(
-      { username: foundUser.username },
+      { user: foundUser.user },
       process.env.REFRESH_TOKEN_SECRET,
       { expiresIn: "30m" }
     );
@@ -67,19 +69,19 @@ const handleLogin = async (req, res) => {
 //   if (!user || !pwd)
 //     return res
 //       .status(400)
-//       .json({ message: "Username and password are required." });
+//       .json({ message: "user and pwd are required." });
 
-//   const foundUser = await User.findOne({ username: user }).exec();
+//   const foundUser = await User.findOne({ user: user }).exec();
 //   if (!foundUser) return res.sendStatus(401); //Unauthorized
-//   // evaluate password
-//   const match = await bcrypt.compare(pwd, foundUser.password);
+//   // evaluate pwd
+//   const match = await bcrypt.compare(pwd, foundUser.pwd);
 //   if (match) {
 //     const roles = Object.values(foundUser.roles).filter(Boolean);
 //     // create JWTs
 //     const accessToken = jwt.sign(
 //       {
 //         UserInfo: {
-//           username: foundUser.username,
+//           user: foundUser.user,
 //           roles: roles,
 //         },
 //       },
@@ -87,7 +89,7 @@ const handleLogin = async (req, res) => {
 //       { expiresIn: "10m" }
 //     );
 //     const newRefreshToken = jwt.sign(
-//       { username: foundUser.username },
+//       { user: foundUser.user },
 //       process.env.REFRESH_TOKEN_SECRET,
 //       { expiresIn: "30m" }
 //     );

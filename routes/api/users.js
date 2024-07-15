@@ -28,7 +28,7 @@ router
   .patch(usersController.updateUserProfile);
 
 // 비밀번호 변경 라우트 (유저 본인만 접근 가능)
-router.patch("/:id/change-password", usersController.changePassword);
+router.patch("/:id/change-pwd", usersController.changePwd);
 
 // 프로필 이미지 업로드 라우트
 router.post(

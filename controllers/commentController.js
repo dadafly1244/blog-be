@@ -21,7 +21,7 @@ const getAllComments = async (req, res) => {
       .skip(offset)
       .limit(limit)
       .sort({ createdAt: -1 })
-      .populate("user", "username")
+      .populate("user", "user")
       .lean();
 
     const count = await Comment.countDocuments(condition);
@@ -163,7 +163,7 @@ const getReplies = async (req, res) => {
     const comment = await Comment.findById(id)
       .populate({
         path: "replies",
-        populate: { path: "user", select: "username" },
+        populate: { path: "user", select: "user" },
         match: { isDelete: false },
         options: { skip: offset, limit: limit, sort: { createdAt: -1 } },
       })
@@ -199,7 +199,7 @@ const getCommentsByNoteId = async (req, res) => {
       .skip(offset)
       .limit(limit)
       .sort({ createdAt: -1 })
-      .populate("user", "username")
+      .populate("user", "user")
       .lean();
 
     const count = await Comment.countDocuments({ noteId, isDelete: false });

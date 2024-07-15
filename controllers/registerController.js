@@ -9,7 +9,7 @@ const handleNewUser = async (req, res) => {
   // 필수 입력 항목 검증
   if (!user || !pwd || !profile || !profile.bio) {
     return res.status(400).json({
-      message: "Username, password, and bio are required.",
+      message: "user, pwd, and bio are required.",
     });
   }
 
@@ -17,9 +17,9 @@ const handleNewUser = async (req, res) => {
   console.log("rolelist", req.body);
   try {
     // 중복 사용자 검증
-    const duplicateCount = await User.countDocuments({ username: user });
+    const duplicateCount = await User.countDocuments({ user: user });
     if (duplicateCount > 0) {
-      return res.status(409).json({ message: "Username already exists." }); // Conflict
+      return res.status(409).json({ message: "user already exists." }); // Conflict
     }
 
     // 비밀번호 암호화
@@ -28,7 +28,7 @@ const handleNewUser = async (req, res) => {
     const accessToken = jwt.sign(
       {
         UserInfo: {
-          username: user,
+          user: user,
           roles: roles,
         },
       },
@@ -38,7 +38,7 @@ const handleNewUser = async (req, res) => {
 
     // refreshToken 생성 (긴 만료 시간)
     const refreshToken = jwt.sign(
-      { username: user },
+      { user: user },
       process.env.REFRESH_TOKEN_SECRET,
       { expiresIn: "30m" }
     );
@@ -74,8 +74,8 @@ const handleNewUser = async (req, res) => {
 
     // 새 사용자 생성 및 저장
     const newUser = await User.create({
-      username: user,
-      password: hashedPwd,
+      user: user,
+      pwd: hashedPwd,
       roles: userRole,
       profile: profileData,
       refreshToken: [refreshToken],
