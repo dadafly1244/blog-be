@@ -61,7 +61,7 @@ const handleNewUser = async (req, res) => {
       status: status || "inActive",
       avatar: profile?.avatar || "",
       location: profile?.location || "",
-      website: profile?.website || "",
+      website: `${DEPLOY_URL}/blog/${user}`,
       socialLinks: {
         facebook: profile.socialLinks?.facebook || "",
         twitter: profile.socialLinks?.twitter || "",

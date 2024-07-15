@@ -5,14 +5,14 @@ const ROLES_LIST = require("../../config/roles_list");
 const verifyJWT = require("../../middleware/verifyJWT");
 const categoryController = require("../../controllers/categoryController");
 const isAdminOrBlogOwner = require("../../middleware/isAdminOrBlogOwner");
-const [Admin, ,] = ROLES_LIST;
+const [Admin, , User] = ROLES_LIST;
 // Category routes
 router.use(verifyJWT);
 
 // 카테고리 생성
 router.post(
   "/:blogOwnerId",
-  verifyRoles(Admin),
+  verifyRoles(Admin, User),
   isAdminOrBlogOwner,
   categoryController.createCategory
 );
