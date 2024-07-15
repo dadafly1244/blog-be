@@ -24,11 +24,32 @@ const handleNewUser = async (req, res) => {
 
     // 비밀번호 암호화
     const hashedPwd = await bcrypt.hash(pwd, 10);
-    const newRefreshToken = jwt.sign(
+    // accessToken 생성 (짧은 만료 시간)
+    const accessToken = jwt.sign(
+      {
+        UserInfo: {
+          username: user,
+          roles: roles,
+        },
+      },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: "15m" }
+    );
+
+    // refreshToken 생성 (긴 만료 시간)
+    const refreshToken = jwt.sign(
       { username: user },
       process.env.REFRESH_TOKEN_SECRET,
       { expiresIn: "30m" }
     );
+
+    // refreshToken을 쿠키에 설정
+    res.cookie("jwt", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Strict",
+      maxAge: 30 * 60 * 1000, //7 * 24 * 60 * 60 * 1000, // 7 days
+    });
     // 프로필 정보 초기화
     const profileData = {
       firstName: profile?.firstName || "당신의 성을 알고 싶어요.",
@@ -57,14 +78,21 @@ const handleNewUser = async (req, res) => {
       password: hashedPwd,
       roles: userRole,
       profile: profileData,
-      refreshToken: [newRefreshToken],
+      refreshToken: [refreshToken],
     });
 
     console.log("newUser", newUser);
 
+    res.cookie("jwt", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "Strict",
+      maxAge: 30 * 60 * 1000, //7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
     res.status(201).json({
       success: `New user ${user} created!`,
-      refreshToken: [newRefreshToken],
+      accessToken,
     });
   } catch (err) {
     console.error(err);
